@@ -442,7 +442,16 @@ class MaterialUiPhoneNumber extends React.Component {
     const nextSelectedCountry = isString(country) ? find(onlyCountries, (countryItem) => countryItem.iso2 === country) : find(onlyCountries, country);
 
     const unformattedNumber = formattedNumber.replace(' ', '').replace('(', '').replace(')', '').replace('-', '');
-    const newNumber = unformattedNumber.length > 1 ? unformattedNumber.replace(currentSelectedCountry.dialCode, nextSelectedCountry.dialCode) : nextSelectedCountry.dialCode;
+    const newNumber;
+    if (unformattedNumber.length > 1) {
+      if (unformattedNumber.startsWith('+' + currentSelectedCountry.dialCode)) {
+        newNumber = unformattedNumber.replace('+' + currentSelectedCountry.dialCode, '+' + nextSelectedCountry.dialCode);
+      } else {
+        newNumber = unformattedNumber.replace(/^\+?/, '+' + nextSelectedCountry.dialCode);
+      }
+    } else {
+      newNumber = nextSelectedCountry.dialCode;
+    }
 
     const newFormattedNumber = this.formatNumber(newNumber.replace(/\D/g, ''), nextSelectedCountry.format);
 
