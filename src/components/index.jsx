@@ -591,7 +591,7 @@ class MaterialUiPhoneNumber extends React.Component {
     const { formattedNumber } = this.state;
     const { isValid } = this.props;
 
-    return isValid(formattedNumber.replace(/\D/g, ''));
+    return isValid(formattedNumber.replace(/\D/g, ''), this.props, this.state);
   };
 
   updateFormattedNumber = (number) => {
@@ -850,7 +850,27 @@ MaterialUiPhoneNumber.defaultProps = {
 
   autoFormat: true,
   disableAreaCodes: false,
-  isValid: (inputNumber) => some(countryData.allCountries, (country) => startsWith(inputNumber, country.dialCode) || startsWith(country.dialCode, inputNumber)),
+  isValid: (inputNumber, props, state) => {
+    if (!props.disableCountryCode) {
+      // validate country code matches a valid country
+      if (!some(state.onlyCountries, (country) => {
+        if (!startsWith(inputNumber, country.dialCode) && !startsWith(country.dialCode, inputNumber)) {
+          return false;
+        }
+        return true;
+      })) {
+        return false;
+      }
+    }
+
+    if (state.selectedCountry && state.selectedCountry.format) {
+      // ensure that the length of the input matches the number of dots in the format specifier
+      // and if we're skipping the country code on the input, then add that to the length of the input
+      return (String(inputNumber).length + (props.disableCountryCode ? state.selectedCountry.dialCode.length : 0)) >= ((state.selectedCountry.format.match(/\./g) || []).length);
+    }
+
+    return true;
+  },
   disableCountryCode: false,
   disableDropdown: false,
   enableLongNumbers: false,
