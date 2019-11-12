@@ -851,6 +851,10 @@ MaterialUiPhoneNumber.defaultProps = {
   autoFormat: true,
   disableAreaCodes: false,
   isValid: (inputNumber, props, state) => {
+    if (!inputNumber || !inputNumber.length) {
+      return true;
+    }
+
     if (!props.disableCountryCode) {
       // validate country code matches a valid country
       if (!some(state.onlyCountries, (country) => {
