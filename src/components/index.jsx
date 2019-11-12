@@ -852,6 +852,7 @@ MaterialUiPhoneNumber.defaultProps = {
   disableAreaCodes: false,
   isValid: (inputNumber, props, state) => {
     if (!inputNumber || !inputNumber.length) {
+      // treat empty input as valid
       return true;
     }
 
@@ -864,6 +865,11 @@ MaterialUiPhoneNumber.defaultProps = {
         return true;
       })) {
         return false;
+      }
+
+      if (state.selectedCountry && inputNumber === state.selectedCountry.dialCode) {
+        // treat input with only the country code as valid
+        return true;
       }
     }
 
