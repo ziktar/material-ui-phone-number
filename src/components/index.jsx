@@ -280,10 +280,9 @@ class MaterialUiPhoneNumber extends React.Component {
   cursorToEnd = () => {
     const { isModernBrowser } = this.props;
 
-    const input = this.inputRef && this.inputRef.current;
-    if (input) {
-      input.focus();
-      if (isModernBrowser) {
+    if (isModernBrowser) {
+      const input = this.inputRef && this.inputRef.current;
+      if (input && input === document.activeElement) {
         const len = input.value.length;
         input.setSelectionRange(len, len);
       }
@@ -451,7 +450,12 @@ class MaterialUiPhoneNumber extends React.Component {
       freezeSelection: true,
       formattedNumber: newFormattedNumber,
     }, () => {
-      this.cursorToEnd();
+      const input = this.inputRef && this.inputRef.current;
+      if (input) {
+        input.focus();
+        this.cursorToEnd();
+      }
+
       if (onChange) {
         onChange(newFormattedNumber, this.getCountryData());
       }
