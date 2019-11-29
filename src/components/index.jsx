@@ -121,6 +121,15 @@ class MaterialUiPhoneNumber extends React.Component {
       debouncedQueryStingSearcher: debounce(this.searchCountry, 100),
       anchorEl: null,
     };
+
+    const propRef = props.inputRef || props.inputProps.ref;
+    if (!propRef) {
+      this.inputRef = React.createRef();
+    } else if (typeof propRef === 'function') {
+      propRef(this.inputRef = React.createRef());
+    } else {
+      this.inputRef = propRef;
+    }
   }
 
   componentDidMount() {
@@ -271,11 +280,13 @@ class MaterialUiPhoneNumber extends React.Component {
   cursorToEnd = () => {
     const { isModernBrowser } = this.props;
 
-    const input = this.inputRef;
-    input.focus();
-    if (isModernBrowser) {
-      const len = input.value.length;
-      input.setSelectionRange(len, len);
+    const input = this.inputRef && this.inputRef.current;
+    if (input) {
+      input.focus();
+      if (isModernBrowser) {
+        const len = input.value.length;
+        input.setSelectionRange(len, len);
+      }
     }
   }
 
@@ -385,7 +396,7 @@ class MaterialUiPhoneNumber extends React.Component {
         ? newSelectedCountry
         : selectedCountry,
     }, () => {
-      if (isModernBrowser) {
+      if (isModernBrowser && this.inputRef && this.inputRef.current) {
         if (diff > 0) {
           caretPosition -= diff;
         }
@@ -393,9 +404,9 @@ class MaterialUiPhoneNumber extends React.Component {
         const lastChar = formattedNumber.charAt(formattedNumber.length - 1);
 
         if (lastChar === ')') {
-          this.inputRef.setSelectionRange(formattedNumber.length - 1, formattedNumber.length - 1);
+          this.inputRef.current.setSelectionRange(formattedNumber.length - 1, formattedNumber.length - 1);
         } else if (caretPosition > 0 && oldFormattedText.length >= formattedNumber.length) {
-          this.inputRef.setSelectionRange(caretPosition, caretPosition);
+          this.inputRef.current.setSelectionRange(caretPosition, caretPosition);
         }
       }
 
@@ -404,27 +415,6 @@ class MaterialUiPhoneNumber extends React.Component {
       }
     });
   }
-
-  handleRefInput = (ref) => {
-    const { inputRef, InputProps } = this.props;
-    this.inputRef = ref;
-
-    let refProp;
-
-    if (inputRef) {
-      refProp = inputRef;
-    } else if (InputProps && InputProps.ref) {
-      refProp = InputProps.ref;
-    }
-
-    if (refProp) {
-      if (typeof refProp === 'function') {
-        refProp(ref);
-      } else {
-        refProp.current = ref;
-      }
-    }
-  };
 
   handleInputClick = (e) => {
     const { onClick } = this.props;
@@ -473,8 +463,8 @@ class MaterialUiPhoneNumber extends React.Component {
     const { disableCountryCode, onFocus } = this.props;
 
     // if the input is blank, insert dial code of the selected country
-    if (this.inputRef) {
-      if (this.inputRef.value === '+' && selectedCountry && !disableCountryCode) {
+    if (this.inputRef && this.inputRef.current) {
+      if (this.inputRef.current.value === '+' && selectedCountry && !disableCountryCode) {
         this.setState({
           formattedNumber: `+${selectedCountry.dialCode}`,
         }, () => setTimeout(this.cursorToEnd, 10));
@@ -768,7 +758,7 @@ class MaterialUiPhoneNumber extends React.Component {
         placeholder={statePlaceholder}
         value={formattedNumber}
         className={inputClass}
-        inputRef={this.handleRefInput}
+        inputRef={this.inputRef}
         error={error || !this.checkIfValid()}
         onChange={this.handleInput}
         onClick={this.handleInputClick}
@@ -805,7 +795,10 @@ MaterialUiPhoneNumber.propTypes = {
   dropdownClass: PropTypes.string,
   InputProps: PropTypes.object,
   inputProps: PropTypes.object,
-  inputRef: PropTypes.func,
+  inputRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.object }),
+  ]),
 
   autoFormat: PropTypes.bool,
   disableAreaCodes: PropTypes.bool,
