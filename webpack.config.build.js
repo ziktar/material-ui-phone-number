@@ -1,6 +1,9 @@
 const webpack = require('webpack');
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const common = require('./webpack.config.common');
+const TerserPlugin = require("terser-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 module.exports = merge(common, {
   mode: 'production',
@@ -25,11 +28,9 @@ module.exports = merge(common, {
         root: '_',
       },
     },
-    '@material-ui/core',
-    /@material-ui\/core\/*./,
-    '@material-ui/styles',
-    /@material-ui\/styles\/*./,
-    'classnames',
+    '@mui/material',
+    /@mui\/material\/*./,
+    'clsx',
   ],
   plugins: [
     new webpack.DefinePlugin({
@@ -38,5 +39,21 @@ module.exports = merge(common, {
       },
       __DEV__: false,
     }),
+    new MiniCssExtractPlugin()
   ],
+  module: {
+    rules: [
+      {
+        test: /.s?css$/,
+        use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
+      },
+    ],
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin(),
+      new CssMinimizerPlugin(),
+    ],
+  },
 });
