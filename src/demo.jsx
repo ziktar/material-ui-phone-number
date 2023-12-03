@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import MaterialUiPhoneNumber from './index';
 
 class ChangeDemo extends React.Component {
@@ -34,7 +34,8 @@ class ChangeDemo extends React.Component {
   }
 }
 
-export default render(
+const root = createRoot(document.getElementById('root'));
+export default root.render(
   <div style={{ fontFamily: "'Roboto', sans-serif", fontSize: '15px' }}>
     <div style={{ display: 'inline-block', verticalAlign: 'top' }}>
       <p>v1.1.0</p>
@@ -117,6 +118,5 @@ export default render(
         placeholder="(702) 123-4567"
       />
     </div>
-  </div>,
-  document.getElementById('root'),
+  </div>
 );

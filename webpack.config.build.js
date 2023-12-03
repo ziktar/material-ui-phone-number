@@ -21,12 +21,6 @@ module.exports = merge(common, {
         commonjs: 'react-dom',
         amd: 'react-dom',
       },
-      lodash: {
-        commonjs: 'lodash',
-        commonjs2: 'lodash',
-        amd: 'lodash',
-        root: '_',
-      },
     },
     '@mui/material',
     /@mui\/material\/*./,
